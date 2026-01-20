@@ -1,0 +1,278 @@
+{
+  "name": "Processamento Gold",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8bb10e1e-acc0-449f-919f-a5662e3c3dec",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM bronze_enrichments",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c56b01a6-26cb-45e8-ad27-b5297cc4bf7d",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "7Ellk0j2UP8uKzYd",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop sobre os itens que vieram do banco\nreturn items.map(item => {\n  const json = item.json;\n  \n  // Cálculo de duração (Minutos)\n  const created = new Date(json.created_at);\n  const updated = new Date(json.updated_at);\n  const diffMs = updated - created;\n  const duracaoMin = diffMs / 1000 / 60;\n\n  // Categoria de tamanho\n  let tamanho = 'PEQUENO';\n  const total = json.total_contacts;\n  if (total >= 100 && total <= 500) tamanho = 'MEDIO';\n  if (total > 500 && total <= 1000) tamanho = 'GRANDE';\n  if (total > 1000) tamanho = 'MUITO_GRANDE';\n\n  // Traduções\n  const statusMap = {\n    'COMPLETED': 'CONCLUIDO',\n    'FAILED': 'FALHOU',\n    'PROCESSING': 'EM_PROCESSAMENTO',\n    'CANCELED': 'CANCELADO'\n  };\n\n  const typeMap = {\n    'COMPANY': 'EMPRESA',\n    'PERSON': 'PESSOA'\n  };\n\n  return {\n    json: {\n      id_enriquecimento: json.id,\n      id_workspace: json.id_workspace,\n      nome_workspace: json.workspace_name,\n      total_contatos: json.total_contacts,\n      tipo_contato: typeMap[json.contact_type] || json.contact_type,\n      status_processamento: statusMap[json.status] || json.status,\n      data_criacao: json.created_at,\n      data_atualizacao: json.updated_at,\n      duracao_processamento_minutos: duracaoMin,\n      categoria_tamanho_job: tamanho,\n      processamento_sucesso: (json.status === 'COMPLETED'),\n      data_atualizacao_dw: new Date().toISOString()\n    }\n  }\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "b727e5bf-dfef-4a4c-b868-ddc3151aaab1",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "gold_enrichments",
+          "mode": "list",
+          "cachedResultName": "gold_enrichments"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "processamento_sucesso": false,
+            "necessita_reprocessamento": false,
+            "total_contatos": 0,
+            "duracao_processamento_minutos": 0,
+            "tempo_por_contato_minutos": 0,
+            "id_enriquecimento": "={{ $json.id_enriquecimento }}",
+            "id_workspace": "={{ $json.id_workspace }}",
+            "nome_workspace": "={{ $json.nome_workspace }}"
+          },
+          "matchingColumns": [
+            "id_enriquecimento"
+          ],
+          "schema": [
+            {
+              "id": "id_enriquecimento",
+              "displayName": "id_enriquecimento",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "id_workspace",
+              "displayName": "id_workspace",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "nome_workspace",
+              "displayName": "nome_workspace",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "total_contatos",
+              "displayName": "total_contatos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "tipo_contato",
+              "displayName": "tipo_contato",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "status_processamento",
+              "displayName": "status_processamento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "data_criacao",
+              "displayName": "data_criacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "data_atualizacao",
+              "displayName": "data_atualizacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "duracao_processamento_minutos",
+              "displayName": "duracao_processamento_minutos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "tempo_por_contato_minutos",
+              "displayName": "tempo_por_contato_minutos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "processamento_sucesso",
+              "displayName": "processamento_sucesso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "categoria_tamanho_job",
+              "displayName": "categoria_tamanho_job",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "necessita_reprocessamento",
+              "displayName": "necessita_reprocessamento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "data_atualizacao_dw",
+              "displayName": "data_atualizacao_dw",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        624,
+        0
+      ],
+      "id": "276f1e2a-af23-467b-8ae9-23bdc19de8d5",
+      "name": "Insert or update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "7Ellk0j2UP8uKzYd",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Insert or update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "70d49faf-9b3d-4b05-82ae-ed6d6f164380",
+  "meta": {
+    "instanceId": "85a0ee1b07d6d54b616a7eb1d1011ff686b68cac64a08eaca071dc75ca5e9b74"
+  },
+  "id": "cfF86BaZ5AyzEl5KOA5zr",
+  "tags": []
+}

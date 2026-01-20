@@ -3,6 +3,15 @@ const { Pool } = require('pg');     // Biblioteca que conecta no Postgres
 const cors = require('cors');       // Permite que o Dashboard (frontend) acesse a API
 const crypto = require('crypto'); // Para o UUID
 
+// --- SIMULAÇÃO DE BASE DE CLIENTES ---
+const FAKE_WORKSPACES = [
+    { id: 'e6bb64bf-46e4-410d-8406-c61e267ea607', name: 'Tech Solutions Corp' },
+    { id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', name: 'Retail Giant SA' },
+    { id: '550e8400-e29b-41d4-a716-446655440000', name: 'Driva Analytics' },
+    { id: '123e4567-e89b-12d3-a456-426614174000', name: 'Logistics Pro' },
+    { id: 'c73bcdcc-2669-4bf6-81d3-e4ae73fb11fd', name: 'Financeira Top' }
+];
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -55,10 +64,10 @@ app.get('/people/v1/enrichments', (req, res) => {
         const idGlobal = (page - 1) * limit + i; // ID sequencial fictício
         if (idGlobal >= totalItems) break;
 
-        const idReal = crypto.randomUUID(); 
-        const idWorkspaceReal = crypto.randomUUID();
+        const randomWorkspace = FAKE_WORKSPACES[Math.floor(Math.random() * FAKE_WORKSPACES.length)];
+        const idEnrichment = crypto.randomUUID();
 
-        // LÓGICA DE DATAS REALISTA
+
         const dataCriacao = new Date();
         // Joga a criação para um tempo aleatório no passado (0 a 60 min atrás)
         dataCriacao.setMinutes(dataCriacao.getMinutes() - Math.floor(Math.random() * 60));
@@ -68,9 +77,9 @@ app.get('/people/v1/enrichments', (req, res) => {
 
         // Cria um objeto JSON (parecido com struct)
         data.push({
-            id: idReal,
-            id_workspace: idWorkspaceReal,
-            workspace_name: `Empresa Teste ${idGlobal}`,
+            id: idEnrichment,
+            id_workspace: randomWorkspace.id,
+            workspace_name: randomWorkspace.name,
             total_contacts: Math.floor(Math.random() * 2000), // Random entre 0 e 2000
             contact_type: Math.random() > 0.5 ? "COMPANY" : "PERSON",
             status: Math.random() > 0.1 ? "COMPLETED" : "FAILED", // 10% de chance de falha
