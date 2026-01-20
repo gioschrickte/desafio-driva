@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # --- SERVIÇO 1: BANCO DE DADOS ---
+  postgres:
+    image: postgres:15
+    container_name: driva_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user_driva
+      POSTGRES_PASSWORD: password_driva
+      POSTGRES_DB: driva_dw
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # --- SERVIÇO 2: AUTOMAÇÃO (n8n) ---
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: driva_n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=admin
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=driva_dw
+      - DB_POSTGRESDB_USER=user_driva
+      - DB_POSTGRESDB_PASSWORD=password_driva
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      - postgres
+
+  # --- SERVIÇO 3: API (Backend) ---
+  api:
+    build: ./api
+    container_name: driva_api
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_DATABASE=driva_dw
+      - DB_POSTGRESDB_USER=user_driva
+      - DB_POSTGRESDB_PASSWORD=password_driva
+    depends_on:
+      - postgres
+  frontend:
+    build: ./frontend
+    container_name: driva_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+    volumes:
+    - ./frontend:/app
+    - /app/node_modules
+
+volumes:
+  n8n_data:
