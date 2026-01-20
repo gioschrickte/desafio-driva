@@ -1,172 +1,183 @@
-```markdown
-# 🚀 Driva Data Pipeline Challenge
+Perfeito. Abaixo está uma **versão revisada do README**, com linguagem mais técnica e profissional, sem emojis, sem floreio e com foco claro em engenharia, decisões e execução. Mantive a estrutura, mas enxuguei excessos, corrigi pequenos ruídos e deixei o texto com “cara” de repositório sério de desafio técnico.
 
-Solução completa de Engenharia de Dados desenvolvida para o desafio técnico da Driva.
-O projeto implementa um pipeline **ETL (Extract, Transform, Load)** automatizado, utilizando arquitetura de microsserviços containerizados para ingestão, processamento, armazenamento e visualização de dados de enriquecimento corporativo.
-
-## 🏗️ Arquitetura da Solução
-
-O sistema foi desenhado seguindo o padrão de **Data Warehouse em Camadas (Bronze/Gold)**, garantindo rastreabilidade e integridade dos dados.
-
-### Tech Stack
-* **Orquestração & ETL:** n8n (Workflow Automation)
-* **Banco de Dados:** PostgreSQL 14 (Camadas Bronze e Gold)
-* **Backend/API:** Node.js + Express (Simulação de Fonte + Analytics)
-* **Frontend:** React + Vite (Dashboard)
-* **Infraestrutura:** Docker & Docker Compose
-
-### Fluxo de Dados
-1.  **Fonte (Source):** API Node.js gera dados sintéticos de enriquecimentos (com simulação de falhas 429 e paginação).
-2.  **Ingestão (Bronze):** O n8n consome a API a cada 5 minutos, salvando o JSON bruto na tabela `bronze_enrichments`.
-3.  **Processamento (Gold):** O n8n normaliza os dados, traduz para PT-BR, calcula métricas de tempo (`delta_t`) e categoriza o tamanho do job, salvando na `gold_enrichments`.
-4.  **Visualização:** O Dashboard React consome a API de Analytics para exibir KPIs e Rankings.
+Você pode **substituir integralmente** o README atual por este.
 
 ---
 
-## ⚡ Como Executar o Projeto
+````markdown
+# Driva Data Pipeline Challenge
+
+Solução de Engenharia de Dados desenvolvida para o desafio técnico da **Driva**.  
+O projeto implementa um pipeline **ETL (Extract, Transform, Load)** automatizado, utilizando arquitetura de microsserviços containerizados para ingestão, processamento, armazenamento e visualização de dados de enriquecimento corporativo.
+
+---
+
+## Arquitetura da Solução
+
+O sistema foi projetado seguindo o padrão de **Data Warehouse em Camadas (Bronze / Gold)**, priorizando rastreabilidade, idempotência e separação clara de responsabilidades.
+
+### Stack Tecnológica
+
+- **Orquestração & ETL:** n8n  
+- **Banco de Dados:** PostgreSQL 14  
+- **Backend / API:** Node.js + Express  
+- **Frontend:** React + Vite  
+- **Infraestrutura:** Docker e Docker Compose  
+
+### Fluxo de Dados
+
+1. **Fonte (Source)**  
+   API em Node.js gera dados sintéticos de enriquecimentos corporativos, incluindo paginação e simulação de falhas HTTP 429 (Rate Limit).
+
+2. **Ingestão (Bronze Layer)**  
+   O n8n consome a API periodicamente e persiste o JSON bruto na tabela `bronze_enrichments`, preservando o dado original.
+
+3. **Processamento (Gold Layer)**  
+   O n8n normaliza os dados, aplica regras de negócio, traduz campos para PT-BR, calcula métricas temporais (`delta_t`) e categoriza o tamanho dos jobs, persistindo o resultado em `gold_enrichments`.
+
+4. **Visualização**  
+   Um dashboard em React consome a API de Analytics para exibição de KPIs e rankings.
+
+---
+
+## Como Executar o Projeto
 
 ### Pré-requisitos
-* Docker e Docker Compose instalados.
 
-### 1. Inicialização
-Na raiz do projeto, execute o comando para construir e subir todos os contêineres:
+- Docker  
+- Docker Compose  
+
+### Inicialização
+
+Na raiz do projeto, execute:
 
 ```bash
 docker-compose up -d --build
+````
 
-```
+Os seguintes serviços serão iniciados:
 
-Isso iniciará os seguintes serviços:
+* **PostgreSQL:** porta `5432` (database `driva_dw`)
+* **n8n:** porta `5678`
+* **API:** porta `3000`
+* **Frontend:** porta `5173`
 
-* **Postgres:** Porta 5432 (Banco de dados `driva_dw`)
-* **n8n:** Porta 5678 (Interface de fluxos)
-* **API:** Porta 3000 (Endpoints)
-* **Frontend:** Porta 5173 (Dashboard)
+### Acesso aos Serviços
 
-### 2. Acesso
-
-* **Dashboard:** [http://localhost:5173](https://www.google.com/search?q=http://localhost:5173)
-* **n8n Editor:** [http://localhost:5678](https://www.google.com/search?q=http://localhost:5678)
-* **API Health:** [http://localhost:3000/analytics/overview](https://www.google.com/search?q=http://localhost:3000/analytics/overview)
-
----
-
-## ⚙️ Configuração dos Workflows (n8n)
-
-Para ativar o pipeline de dados, é necessário importar os fluxos de automação:
-
-1. Acesse o n8n em [http://localhost:5678](https://www.google.com/search?q=http://localhost:5678).
-2. Configure a credencial do **PostgreSQL** com os dados do `docker-compose.yml` (Host: `postgres`, User: `user_driva`, Pass: `password_driva`, DB: `driva_dw`).
-3. Configure a credencial **Header Auth** para a API (Name: `Authorization`, Value: `Bearer driva_test_key_abc123xyz789`).
-4. Importe os arquivos JSON localizados na pasta `/workflows` deste repositório.
-5. Ative o workflow **"Orquestrador"** (Switch "Active").
-
-> **Nota:** O Orquestrador executa a cada 5 minutos. Para testar imediatamente, clique em "Execute Workflow" manualmente.
+* Dashboard: [http://localhost:5173](http://localhost:5173)
+* n8n Editor: [http://localhost:5678](http://localhost:5678)
+* API (Analytics): [http://localhost:3000/analytics/overview](http://localhost:3000/analytics/overview)
 
 ---
 
-## 📡 Documentação da API
+## Configuração dos Workflows (n8n)
 
-A API foi construída em Node.js e possui duas responsabilidades distintas:
+Para ativar o pipeline de dados:
+
+1. Acesse o n8n em [http://localhost:5678](http://localhost:5678)
+2. Configure a credencial **PostgreSQL** com:
+
+   * Host: `postgres`
+   * User: `user_driva`
+   * Password: `password_driva`
+   * Database: `driva_dw`
+3. Configure a credencial **Header Auth**:
+
+   * Name: `Authorization`
+   * Value: `Bearer driva_test_key_abc123xyz789`
+4. Importe os arquivos JSON localizados na pasta `/workflows`
+5. Ative o workflow **Orquestrador**
+
+> O workflow é executado automaticamente a cada 5 minutos.
+> Para testes imediatos, utilize a opção **Execute Workflow** no n8n.
+
+---
+
+## Documentação da API
+
+A API possui duas responsabilidades principais.
 
 ### 1. Simulação de Fonte (Ingestão)
 
-Simula o comportamento de um sistema externo de enriquecimento.
+Simula um sistema externo de enriquecimento de dados.
 
 * **Endpoint:** `GET /people/v1/enrichments`
-* **Auth:** `Bearer driva_test_key_abc123xyz789`
-* **Features:**
-* **Paginação:** Suporta `?page=X&limit=Y`.
-* **Chaos Engineering:** Simula erros **429 Too Many Requests** aleatoriamente (30% de chance) para testar a resiliência (Retry/Backoff) do n8n.
-* **Dados Dinâmicos:** Gera datas de criação e atualização realistas para cálculo de métricas.
+* **Autenticação:** Bearer Token
 
+**Funcionalidades:**
 
+* Paginação via `page` e `limit`
+* Simulação de erros HTTP 429 (30% de chance)
+* Geração dinâmica de datas para cálculo de métricas
+
+---
 
 ### 2. Analytics (Consumo)
 
 Fornece dados estruturados da camada Gold para o Dashboard.
 
-* `GET /analytics/overview`: KPIs gerais (Total, Taxa de Sucesso, Tempo Médio).
-* `GET /analytics/enrichments`: Lista dos últimos jobs processados.
-* `GET /analytics/workspaces/top` (**Bônus**): Ranking dos workspaces com maior volume de contatos.
+* `GET /analytics/overview`
+  KPIs gerais (volume total, taxa de sucesso, tempo médio)
+
+* `GET /analytics/enrichments`
+  Lista dos jobs processados recentemente
+
+* `GET /analytics/workspaces/top`
+  Ranking de workspaces com maior volume de contatos processados
 
 ---
 
-## 🧠 Decisões de Arquitetura
+## Decisões de Arquitetura
 
-Durante o desenvolvimento, as seguintes decisões técnicas foram tomadas para atender aos requisitos:
+### 1. Idempotência via Upsert
 
-1. **Estratégia de Upsert (Idempotência):**
-Tanto na camada Bronze quanto na Gold, utilizamos a operação de *Insert or Update* baseada no ID. Isso garante que, se o pipeline rodar duas vezes sobre os mesmos dados, não haverá duplicidade, apenas atualização de estado.
-2. **Resiliência (Retry com Backoff):**
-Como a API de fonte simula erros 429 (Rate Limit), o workflow de ingestão no n8n foi configurado para tentar novamente após 2 segundos em caso de falha, garantindo robustez na coleta de dados.
-3. **Separação de Camadas (Bronze vs Gold):**
-* **Bronze:** Armazena o dado cru (`jsonb` ou texto fiel à origem) e datas de controle (`dw_ingested_at`). O objetivo é nunca perder o dado original.
-* **Gold:** Aplica regras de negócio (tradução `COMPANY` -> `EMPRESA`, cálculo de `duracao_minutos`). O Dashboard lê apenas desta camada otimizada.
+As camadas Bronze e Gold utilizam operações de **Insert or Update**, garantindo que múltiplas execuções do pipeline não gerem duplicidade de dados.
 
+### 2. Resiliência a Falhas (Retry com Backoff)
 
-4. **Frontend Dockerizado:**
-O Dashboard utiliza uma imagem `node:22-alpine` para compatibilidade com o Vite moderno, rodando em container para garantir que o ambiente seja agnóstico ao Sistema Operacional do host.
+A ingestão foi projetada para lidar com falhas de Rate Limit (HTTP 429), utilizando retry com atraso configurado no n8n, garantindo robustez na coleta.
+
+### 3. Separação de Camadas (Bronze / Gold)
+
+* **Bronze:**
+  Armazena o dado bruto, fiel à origem, com controle de ingestão (`dw_ingested_at`).
+
+* **Gold:**
+  Contém dados tratados, normalizados e prontos para consumo analítico.
+
+O frontend consome exclusivamente a camada Gold.
+
+### 4. Frontend Containerizado
+
+O dashboard é executado em container utilizando `node:22-alpine`, garantindo consistência de ambiente e compatibilidade com o Vite.
 
 ---
 
-## 🧪 Como Rodar Testes Manuais
+## Testes Manuais
 
-Para validar o funcionamento via terminal (cURL):
-
-**Testar Ingestão (Simulando o n8n):**
+### Teste de Ingestão
 
 ```bash
 curl -v -H "Authorization: Bearer driva_test_key_abc123xyz789" \
 "http://localhost:3000/people/v1/enrichments?page=1&limit=5"
-
 ```
 
-**Testar Analytics (Simulando o Dashboard):**
+### Teste de Analytics
 
 ```bash
 curl "http://localhost:3000/analytics/workspaces/top"
-
 ```
+
+---
 
 ```
 
 ---
 
-### Passo 2: O Roteiro do Vídeo (Baseado na Documentação)
+Se quiser, no próximo passo eu posso:
+- Ajustar o README para **inglês técnico** (nível entrevista internacional)
+- Fazer uma versão **ainda mais enxuta**, focada só no avaliador
+- Revisar o **roteiro do vídeo** para soar mais confiante e menos “decorado”
 
-Agora que você tem o README, aqui está como você vai usar ele para apresentar o vídeo. Siga essa lógica para mostrar que você entendeu tudo:
-
-**1. Abertura (O Contexto)**
-* "Olá, sou o [Seu Nome]. Apresento minha solução para o desafio de Engenharia de Dados da Driva. O objetivo foi construir um pipeline robusto para monitorar processos de enriquecimento de dados."
-* "Usei uma arquitetura baseada em microsserviços com Docker, separando claramente as responsabilidades entre Ingestão, Processamento e Visualização."
-
-**2. A Infraestrutura (Mostre o Docker/VS Code)**
-* *Mostre o `docker-compose.yml` rapidamente.*
-* "Aqui temos o orquestrador de contêineres. Temos o Postgres como Data Warehouse, o n8n para automação, a API Node.js e o Frontend. Tudo sobe com um único comando."
-
-**3. O Pipeline (A Estrela do Show - Mostre o n8n)**
-* *Abra o n8n na tela.*
-* "O coração do sistema é o n8n. No workflow de **Ingestão**, configurei tratamento de erro. A API simula falhas 429 (Rate Limit), e implementei uma política de Retry com Backoff para garantir que o dado chegue na camada Bronze."
-* "No fluxo de **Processamento**, pego o dado bruto da Bronze, aplico as regras de negócio (tradução de campos, cálculo de tempo de processamento) e salvo na camada Gold."
-
-**4. A API e Banco de Dados (Mostre o Código/DBeaver ou Terminal)**
-* "No banco, segui a arquitetura medalhão (Bronze/Gold). A Bronze guarda o histórico fiel e a Gold entrega o dado pronto para análise."
-* "Desenvolvi a API com dois papéis: simular a fonte de dados e servir os dados analíticos."
-
-**5. O Resultado Final (Mostre o Dashboard)**
-* *Abra o http://localhost:5173.*
-* "O resultado final é consumido por este Dashboard em React. Aqui temos os KPIs de tempo médio e sucesso."
-* "Como bônus, implementei também o ranking de Top Workspaces, que faz uma agregação direta na camada Gold."
-
-**6. Fechamento**
-* "A solução é totalmente containerizada, resiliente a falhas de rede e segue boas práticas de modelagem dimensional. Obrigado!"
-
----
-
-### Próximos Passos Imediatos:
-1.  **Crie o arquivo README.md** com o conteúdo acima.
-2.  **Exporte os Workflows:** Vá no n8n, baixe os JSONs dos 3 workflows e salve numa pasta `workflows` no seu projeto (o README menciona isso).
-3.  **Grave o vídeo** seguindo o roteiro. Respire fundo, fale devagar. Você construiu tudo, você sabe como funciona! 🚀
-
+Esse projeto está **bem acima da média** de desafio técnico. Agora é só apresentar com calma.
 ```
