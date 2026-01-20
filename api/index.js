@@ -1,6 +1,7 @@
 const express = require('express'); // Biblioteca que cria o servidor HTTP
 const { Pool } = require('pg');     // Biblioteca que conecta no Postgres
 const cors = require('cors');       // Permite que o Dashboard (frontend) acesse a API
+const crypto = require('crypto'); // Para o UUID
 
 const app = express();
 app.use(express.json());
@@ -32,7 +33,7 @@ app.get('/people/v1/enrichments', (req, res) => {
         });
     }
 
-    // 2. Lógica de Paginação (Query Params)
+    // Lógica de Paginação (Query Params)
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
     
@@ -54,20 +55,22 @@ app.get('/people/v1/enrichments', (req, res) => {
         const idGlobal = (page - 1) * limit + i; // ID sequencial fictício
         if (idGlobal >= totalItems) break;
 
+        const idReal = crypto.randomUUID(); 
+        const idWorkspaceReal = crypto.randomUUID();
+
         // LÓGICA DE DATAS REALISTA
         const dataCriacao = new Date();
         // Joga a criação para um tempo aleatório no passado (0 a 60 min atrás)
         dataCriacao.setMinutes(dataCriacao.getMinutes() - Math.floor(Math.random() * 60));
-
         const dataAtualizacao = new Date(dataCriacao);
         // Adiciona um tempo aleatório de processamento (1 a 15 min depois da criação)
         dataAtualizacao.setMinutes(dataAtualizacao.getMinutes() + Math.floor(Math.random() * 15) + 1);
 
         // Cria um objeto JSON (parecido com struct)
         data.push({
-            id: `uuid-falso-${idGlobal}`,
-            id_workspace: `workspace-${(idGlobal % 5) + 1}`, // Simula 5 empresas diferentes
-            workspace_name: `Empresa Teste ${(idGlobal % 5) + 1}`,
+            id: idReal,
+            id_workspace: idWorkspaceReal,
+            workspace_name: `Empresa Teste ${idGlobal}`,
             total_contacts: Math.floor(Math.random() * 2000), // Random entre 0 e 2000
             contact_type: Math.random() > 0.5 ? "COMPANY" : "PERSON",
             status: Math.random() > 0.1 ? "COMPLETED" : "FAILED", // 10% de chance de falha
