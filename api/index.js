@@ -20,6 +20,18 @@ app.get('/people/v1/enrichments', (req, res) => {
         return res.status(401).json({ error: 'Não autorizado' });
     }
 
+
+    // 2. Simulação de Rate Limit
+    // Vamos dar 30% de chance da API rejeitar com 429
+    if (Math.random() < 0.3) { 
+        console.log(`[SIMULAÇÃO] Rejeitando requisição com 429 (Too Many Requests)`);
+        // Retorna o erro e encerra a função
+        return res.status(429).json({ 
+            error: 'Too Many Requests', 
+            message: 'Você está indo rápido demais! Tente novamente em instantes.'
+        });
+    }
+
     // 2. Lógica de Paginação (Query Params)
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
