@@ -1,9 +1,8 @@
-const express = require('express'); // Biblioteca que cria o servidor HTTP
-const { Pool } = require('pg');     // Biblioteca que conecta no Postgres
-const cors = require('cors');       // Permite que o Dashboard (frontend) acesse a API
-const crypto = require('crypto'); // Para o UUID
+const express = require('express'); // HTTP
+const { Pool } = require('pg');     // Postgres
+const cors = require('cors');       // Dashboard
+const crypto = require('crypto'); // UUID
 
-// --- SIMULAÇÃO DE BASE DE CLIENTES ---
 const FAKE_WORKSPACES = [
     { id: 'e6bb64bf-46e4-410d-8406-c61e267ea607', name: 'Tech Solutions Corp' },
     { id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', name: 'Retail Giant SA' },
@@ -16,26 +15,24 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Configuração do Banco de Dados (Lê as variáveis do Docker)
+// Configuração do Banco de Dados
 const pool = new Pool({
     connectionString: `postgres://${process.env.DB_POSTGRESDB_USER}:${process.env.DB_POSTGRESDB_PASSWORD}@${process.env.DB_POSTGRESDB_HOST}:5432/${process.env.DB_POSTGRESDB_DATABASE}`
 });
 
-// --- PARTE 1: SIMULAÇÃO DA FONTE DE DADOS (Endpoint exigido no PDF) ---
-// O PDF pede autenticação via Bearer Token e paginação [cite: 67, 73]
+
+// O PDF pede autenticação via Bearer Token 
 app.get('/people/v1/enrichments', (req, res) => {
     // 1. Verificação de Segurança (Auth)
     const authHeader = req.headers.authorization;
-    if (authHeader !== 'Bearer driva_test_key_abc123xyz789') { // Chave fixa do PDF [cite: 70]
+    if (authHeader !== 'Bearer driva_test_key_abc123xyz789') { // Chave fixa do PDF
         return res.status(401).json({ error: 'Não autorizado' });
     }
 
 
     // 2. Simulação de Rate Limit
-    // Vamos dar 30% de chance da API rejeitar com 429
     if (Math.random() < 0.3) { 
         console.log(`[SIMULAÇÃO] Rejeitando requisição com 429 (Too Many Requests)`);
-        // Retorna o erro e encerra a função
         return res.status(429).json({ 
             error: 'Too Many Requests', 
             message: 'Você está indo rápido demais! Tente novamente em instantes.'
@@ -46,7 +43,7 @@ app.get('/people/v1/enrichments', (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
     
-    // Simulando "Milhares de registros" gerando dados em tempo real (Runtime) [cite: 77]
+    // Simulando "Milhares de registros" gerando dados em tempo real
     const totalItems = 5000; 
     const totalPages = Math.ceil(totalItems / limit);
 
@@ -61,8 +58,6 @@ app.get('/people/v1/enrichments', (req, res) => {
     // Gera dados falsos para essa página
     const data = [];
     for (let i = 0; i < limit; i++) {
-        const idGlobal = (page - 1) * limit + i; // ID sequencial fictício
-        if (idGlobal >= totalItems) break;
 
         const randomWorkspace = FAKE_WORKSPACES[Math.floor(Math.random() * FAKE_WORKSPACES.length)];
         const idEnrichment = crypto.randomUUID();
@@ -75,7 +70,6 @@ app.get('/people/v1/enrichments', (req, res) => {
         // Adiciona um tempo aleatório de processamento (1 a 15 min depois da criação)
         dataAtualizacao.setMinutes(dataAtualizacao.getMinutes() + Math.floor(Math.random() * 15) + 1);
 
-        // Cria um objeto JSON (parecido com struct)
         data.push({
             id: idEnrichment,
             id_workspace: randomWorkspace.id,
@@ -95,8 +89,10 @@ app.get('/people/v1/enrichments', (req, res) => {
     });
 });
 
-// --- PARTE 2: ANALYTICS (Leitura do Banco de Dados para o Dashboard) ---
-// O PDF pede KPIs e lista paginada da camada GOLD [cite: 104, 107]
+
+
+//Leitura do Banco de Dados para o Dashboar
+// O PDF pede KPIs e lista paginada da camada GOLD
 
 // Rota de Visão Geral (KPIs)
 app.get('/analytics/overview', async (req, res) => {
@@ -129,7 +125,7 @@ app.get('/analytics/enrichments', async (req, res) => {
     }
 });
 
-// (Bônus) Ranking de Workspaces [cite: 109]
+// (Bônus) Ranking de Workspaces
 app.get('/analytics/workspaces/top', async (req, res) => {
     try {
         const result = await pool.query(`
