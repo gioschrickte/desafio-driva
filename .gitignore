@@ -1,8 +1,20 @@
+# Dependências do Node (Pesado)
 node_modules
-/frontend/node_modules
+*/node_modules
+
+# Dados do Banco (GIGANTE e Binário - PROIBIDO SUBIR)
+data_postgre
+postgres_data
+pgdata
+var/lib/postgresql/data
+
+# Arquivos de Sistema e Ambiente (Segurança)
 .env
 .DS_Store
+Thumbs.db
+
+# Logs e builds
+npm-debug.log
 dist
+build
 .n8n
-data_postgre/
-postgres_data/
