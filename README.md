@@ -2,6 +2,8 @@
 
 Este repositório contém a solução implementada para o desafio técnico de Engenharia de Dados. O projeto consiste em uma arquitetura de microsserviços containerizados para a ingestão, processamento, armazenamento e visualização de dados de enriquecimento corporativo, seguindo o padrão de arquitetura em camadas (Medallion Architecture - Bronze/Gold).
 
+Vídeo de apresentação: https://www.youtube.com/watch?v=bJr8miidURQ
+
 ## Arquitetura da Solução
 
 O sistema foi desenvolvido utilizando Docker Compose para orquestração dos seguintes serviços:
