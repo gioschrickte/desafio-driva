@@ -1,10 +1,3 @@
-Perfeito. Abaixo está uma **versão revisada do README**, com linguagem mais técnica e profissional, sem emojis, sem floreio e com foco claro em engenharia, decisões e execução. Mantive a estrutura, mas enxuguei excessos, corrigi pequenos ruídos e deixei o texto com “cara” de repositório sério de desafio técnico.
-
-Você pode **substituir integralmente** o README atual por este.
-
----
-
-````markdown
 # Driva Data Pipeline Challenge
 
 Solução de Engenharia de Dados desenvolvida para o desafio técnico da **Driva**.  
@@ -53,7 +46,7 @@ Na raiz do projeto, execute:
 
 ```bash
 docker-compose up -d --build
-````
+```
 
 Os seguintes serviços serão iniciados:
 
@@ -166,18 +159,4 @@ curl -v -H "Authorization: Bearer driva_test_key_abc123xyz789" \
 
 ```bash
 curl "http://localhost:3000/analytics/workspaces/top"
-```
-
----
-
-```
-
----
-
-Se quiser, no próximo passo eu posso:
-- Ajustar o README para **inglês técnico** (nível entrevista internacional)
-- Fazer uma versão **ainda mais enxuta**, focada só no avaliador
-- Revisar o **roteiro do vídeo** para soar mais confiante e menos “decorado”
-
-Esse projeto está **bem acima da média** de desafio técnico. Agora é só apresentar com calma.
 ```
