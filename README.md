@@ -56,7 +56,7 @@ Os fluxos de automação não são persistidos automaticamente via volume do Doc
 
 1. Acesse o editor do n8n em `http://localhost:5678`.
 2. Configure as credenciais:
-* **PostgreSQL:** Host: `driva_postgres`, User: `user_driva`, Pass: `password_driva`, DB: `driva_dw`.
+* **PostgreSQL:** Host: `postgres`, User: `user_driva`, Pass: `password_driva`, DB: `driva_dw`.
 * **Header Auth:** Name: `Authorization`, Value: `Bearer driva_test_key_abc123xyz789`.
 
 
